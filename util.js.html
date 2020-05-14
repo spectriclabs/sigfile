@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>util.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <li class="nav-link nav-home-link"><a href="index.html">Home</a></li><li class="nav-heading">Classes</li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="BaseFileReader.html">BaseFileReader</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BaseFileReader.html#_read">_read</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BaseFileReader.html#read">read</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BaseFileReader.html#read_http">read_http</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BaseFileReader.html#readheader">readheader</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="BitArray.html">BitArray</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BitArray.html#getBit">getBit</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BitArray.html#set">set</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BitArray.html#setArray">setArray</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BitArray.html#setBit">setBit</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BitArray.html#subarray">subarray</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="BlueFileReader.html">BlueFileReader</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BlueFileReader.html#_read">_read</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BlueFileReader.html#read">read</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BlueFileReader.html#read_http">read_http</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BlueFileReader.html#readheader">readheader</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="BlueHeader.html">BlueHeader</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BlueHeader.html#createArray">createArray</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BlueHeader.html#setData">setData</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BlueHeader.html#setHeader">setHeader</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="BlueHeader.html#unpack_keywords">unpack_keywords</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="MatHeader.html">MatHeader</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="MatHeader.html#createArray">createArray</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="MatHeader.html#getDataWithType">getDataWithType</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="MatHeader.html#setData">setData</a></span></li><li class="nav-heading">Namespaces</li><li class="nav-heading"><span class="nav-item-type type-namespace">N</span><span class="nav-item-name"><a href="util.html">util</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="util.html#.ab2str">ab2str</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="util.html#.applySupportsTypedArray">applySupportsTypedArray</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="util.html#.endianness">endianness</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="util.html#.getInt64">getInt64</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="util.html#.parseURL">parseURL</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="util.html#.pow2">pow2</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="util.html#.str2ab">str2ab</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="util.html#.text2buffer">text2buffer</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="util.html#.update">update</a></span></li><li class="nav-heading"><a href="global.html">Globals</a></li>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">util.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @license apache-2.0
+ * @file util.js
+ * Copyright (c) 2012-2020, LGS Innovations Inc., All rights reserved.
+ *
+ * This file is part of SigFile.
+ *
+ * Licensed to the LGS Innovations (LGS) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  LGS licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+/**
+ * @namespace util
+ */
+
+/**
+ * Returns the endianness of the browser
+ *
+ * @example
+ * // returns true
+ * const whichEndian = endianness();
+ * whichEndian === "LE"
+ *
+ * @memberof util
+ * @private
+ * @returns {string} "LE" for Little Endian and "BE" for Big Endian
+ * @throws {Error} Throws Error if endianness is unknown
+ * @see {@link https://gist.github.com/TooTallNate/4750953}
+ */
+function endianness() {
+  const b = new ArrayBuffer(4);
+  const a = new Uint32Array(b);
+  const c = new Uint8Array(b);
+  a[0] = 0xdeadbeef;
+  if (c[0] === 0xef) {
+    return 'LE';
+  } else if (c[0] === 0xde) {
+    return 'BE';
+  } else {
+    throw new Error('unknown endianness');
+  }
+}
+
+/**
+ * JS implementation of Python's dict.update method.
+ * This updates object `dst` with the properties in `src`.
+ *
+ * Note: This has been deprecated in v0.1.4 in favor
+ * of the faster `Object.assign(target, source)`.
+ *
+ * @deprecated since v0.1.4
+ *
+ * @example &lt;caption>Update object&lt;/caption>
+ * // returns {a: 1, b: 2, c: 1, d: 3}
+ * const d1 = {a: 1, b: 2};
+ * const d2 = {c: 1, d: 3};
+ * update(d1, d2) // d1 is now `{a: 1, b: 2, c: 1, d: 3}`
+ *
+ * @memberOf util
+ * @param {object} dst - The object that will be updated
+ * @param {object} src - The object whose properties will be added to `dst`
+ * @returns {object} The updated `dst`. This is only returned for chaining.
+ */
+function update(dst, src) {
+  for (let prop in src) {
+    if (Object.prototype.hasOwnProperty.call(src, prop)) {
+      const val = src[prop];
+      if (typeof val === 'object') {
+        // recursive
+        if (dst[prop] === undefined) {
+          dst[prop] = {};
+        }
+        update(dst[prop], val);
+      } else {
+        dst[prop] = val;
+      }
+    }
+  }
+  return dst; // return dst to allow method chaining
+}
+
+/**
+ * Returns the 64-bit integer from the data buffer at
+ * the requested offset.
+ *
+ * @memberOf util
+ * @param {DataView} dataView - Data buffer
+ * @param {number} index - The byte offset into the data buffer
+ * @param {boolean} littleEndian - The endianness of the data
+ * @returns {number} The 64-bit integer from the `dataView`
+ */
+function getInt64(dataView, index, littleEndian) {
+  const MAX_INT = Math.pow(2, 53);
+  const [highIndex, lowIndex] = littleEndian ? [4, 0] : [0, 4];
+  const high = dataView.getInt32(index + highIndex, littleEndian);
+  const low = dataView.getInt32(index + lowIndex, littleEndian);
+  const rv = low + pow2(32) * high;
+  if (rv >= MAX_INT) {
+    console.warn('Int is bigger than JS can represent.');
+    return Infinity;
+  } else {
+    return rv;
+  }
+}
+
+/**
+ * Determine whether `String.fromCharCode.apply` supports
+ * typed arrays as input.
+ *
+ * @example
+ * // returns true
+ * applySupportsTypedArray()
+ *
+ * @memberOf util
+ * @returns {boolean} Whether `String.fromCharCode.apply` supports typed arrays
+ */
+function applySupportsTypedArray() {
+  try {
+    const uintbuf = new Uint8Array(new ArrayBuffer(4));
+    uintbuf[0] = 66;
+    uintbuf[1] = 76;
+    uintbuf[2] = 85;
+    uintbuf[3] = 69;
+    const test = String.fromCharCode.apply(null, uintbuf);
+    if (test !== 'BLUE') {
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Convert an ArrayBuffer to a string
+ *
+ * @memberOf util
+ * @param   {ArrayBuffer | Array} buf - Data buffer
+ * @param   {boolean} [apply=undefined] - whether or not apply supports typed arrays
+ * @returns {string} The string representation of the data buffer
+ */
+function ab2str(buf, apply) {
+  const uintbuf = new Uint8Array(buf);
+  // Set `_applySupportsTypedArray` as static variable
+  if (typeof ab2str._applySupportsTypedArray == 'undefined') {
+    // It has not... perform the initialization
+    if (apply !== undefined) {
+      ab2str._applySupportsTypedArray = apply;
+    } else {
+      ab2str._applySupportsTypedArray = applySupportsTypedArray();
+    }
+  }
+  // Firefox 3.6 nor iOS devices can use ArrayBuffers with .apply
+  if (ab2str._applySupportsTypedArray) {
+    return String.fromCharCode.apply(null, uintbuf);
+  } else {
+    return uintbuf.reduce((prev, curr) => {
+      return prev + String.fromCharCode(curr);
+    }, '');
+  }
+}
+
+/**
+ * Convert a string to an ArrayBuffer
+ *
+ * @memberOf util
+ * @param {string} str - The string being turning into an ArrayBuffer
+ * @returns {ArrayBuffer} The ArrayBuffer representation of the string
+ */
+function str2ab(str) {
+  const buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+  const bufView = new Uint16Array(buf);
+  for (let i = 0, strLen = str.length; i &lt; strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+
+/**
+ * Calculate $2^n$
+ *
+ * If 31 > n >= 0 then a left-shift is used, otherwise Math.pow is used.
+ *
+ * @example
+ * const result = pow2(5); // == 32
+ *
+ * @memberOf util
+ * @param {number} n - The exponent that we're raising 2 to -- i.e., 2^n
+ * @returns {number} The result of 2^n
+ */
+function pow2(n) {
+  return n >= 0 &amp;&amp; n &lt; 31 ? 1 &lt;&lt; n : pow2[n] || (pow2[n] = Math.pow(2, n));
+}
+
+/**
+ * Internal method to create a new anchor element and uses location
+ * properties (inherent) to get the desired URL data. Some String
+ * operations are used (to normalize results across browsers).
+ *
+ * @memberOf util
+ * @param   {string} url - Properly formatted URL
+ * @returns {object} Object containing URL pieces parsed out
+ *
+ * @see {@link http://james.padolsey.com/javascript/parsing-urls-with-the-dom/}
+ */
+function parseURL(url) {
+  const a = document.createElement('a');
+  a.href = url;
+  return {
+    source: url,
+    protocol: a.protocol.replace(':', ''),
+    host: a.hostname,
+    port: a.port,
+    query: a.search,
+    params: (function () {
+      const ret = {},
+        seg = a.search.replace(/^\?/, '').split('&amp;'),
+        len = seg.length;
+      for (let i = 0; i &lt; len; i++) {
+        if (!seg[i]) {
+          continue;
+        }
+        let s = seg[i].split('=');
+        ret[s[0]] = s[1];
+      }
+      return ret;
+    })(),
+    file: (a.pathname.match(/\/([^/?#]+)$/i) || [null, ''])[1],
+    hash: a.hash.replace('#', ''),
+    path: a.pathname.replace(/^([^/])/, '/$1'),
+    relative: (a.href.match(/tps?:\/\/[^/]+(.+)/) || [null, ''])[1],
+    segments: a.pathname.replace(/^\//, '').split('/'),
+  };
+}
+
+/**
+ * @callback onComplete
+ * @param {ArrayBuffer} x - Callback for when text from HTTP response
+ *                          has been converted into an ArrayBuffer
+ */
+
+/**
+ * Internal method to convert text from an HTTP response
+ * into an ArrayBuffer.
+ *
+ * @memberOf util
+ * @param {string} text - Text from HTTP response being converted
+ * @param {onComplete} oncomplete - Callback that will run after text is converted
+ * @param {number} [blocksize=1024] How much data we're expecting
+ */
+function text2buffer(text, oncomplete, blocksize) {
+  blocksize = blocksize || 1024;
+  let i = 0;
+  const arrayBuffer = new ArrayBuffer(text.length);
+  const bufView = new Uint8Array(arrayBuffer);
+  const worker = () => {
+    const end = i + blocksize;
+    for (; i &lt; end; i++) {
+      bufView[i] = text.charCodeAt(i) &amp; 0xff;
+    }
+    if (i >= text.length) {
+      oncomplete(arrayBuffer);
+    } else {
+      setTimeout(worker, 0);
+    }
+  };
+  setTimeout(worker, 0);
+}
+
+export {
+  applySupportsTypedArray,
+  endianness,
+  update,
+  getInt64,
+  ab2str,
+  str2ab,
+  pow2,
+  parseURL,
+  text2buffer,
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a> on Thu May 14 2020 23:18:13 GMT+0000 (Coordinated Universal Time) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
