@@ -138,7 +138,7 @@ function applySupportsTypedArray() {
     if (test !== 'BLUE') {
       return false;
     }
-  } catch (error) {
+  } catch {
     return false;
   }
   return true;
@@ -220,67 +220,26 @@ function pow2(n) {
  * @see {@link http://james.padolsey.com/javascript/parsing-urls-with-the-dom/}
  */
 function parseURL(url) {
-  const a = document.createElement('a');
-  a.href = url;
+  const parsed = new URL(url, 'http://localhost/');
   return {
     source: url,
-    protocol: a.protocol.replace(':', ''),
-    host: a.hostname,
-    port: a.port,
-    query: a.search,
+    protocol: parsed.protocol.replace(':', ''),
+    host: parsed.hostname,
+    port: parsed.port,
+    query: parsed.search,
     params: (function () {
-      const ret = {},
-        seg = a.search.replace(/^\?/, '').split('&'),
-        len = seg.length;
-      for (let i = 0; i < len; i++) {
-        if (!seg[i]) {
-          continue;
-        }
-        let s = seg[i].split('=');
-        ret[s[0]] = s[1];
+      const ret = {};
+      for (const [key, value] of parsed.searchParams) {
+        ret[key] = value;
       }
       return ret;
     })(),
-    file: (a.pathname.match(/\/([^/?#]+)$/i) || [null, ''])[1],
-    hash: a.hash.replace('#', ''),
-    path: a.pathname.replace(/^([^/])/, '/$1'),
-    relative: (a.href.match(/tps?:\/\/[^/]+(.+)/) || [null, ''])[1],
-    segments: a.pathname.replace(/^\//, '').split('/'),
+    file: (parsed.pathname.match(/\/([^/?#]+)$/i) || [null, ''])[1],
+    hash: parsed.hash.replace('#', ''),
+    path: parsed.pathname.replace(/^([^/])/, '/$1'),
+    relative: (parsed.href.match(/tps?:\/\/[^/]+(.+)/) || [null, ''])[1],
+    segments: parsed.pathname.replace(/^\//, '').split('/'),
   };
-}
-
-/**
- * @callback onComplete
- * @param {ArrayBuffer} x - Callback for when text from HTTP response
- *                          has been converted into an ArrayBuffer
- */
-
-/**
- * Internal method to convert text from an HTTP response
- * into an ArrayBuffer.
- *
- * @memberOf util
- * @param {string} text - Text from HTTP response being converted
- * @param {onComplete} oncomplete - Callback that will run after text is converted
- * @param {number} [blocksize=1024] How much data we're expecting
- */
-function text2buffer(text, oncomplete, blocksize) {
-  blocksize = blocksize || 1024;
-  let i = 0;
-  const arrayBuffer = new ArrayBuffer(text.length);
-  const bufView = new Uint8Array(arrayBuffer);
-  const worker = () => {
-    const end = i + blocksize;
-    for (; i < end; i++) {
-      bufView[i] = text.charCodeAt(i) & 0xff;
-    }
-    if (i >= text.length) {
-      oncomplete(arrayBuffer);
-    } else {
-      setTimeout(worker, 0);
-    }
-  };
-  setTimeout(worker, 0);
 }
 
 export {
@@ -292,5 +251,4 @@ export {
   str2ab,
   pow2,
   parseURL,
-  text2buffer,
 };

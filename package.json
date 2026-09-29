@@ -2,11 +2,64 @@
   "name": "sigfile",
   "description": "Utilities to reading signal data from files",
   "license": "Apache-2.0",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "homepage": "https://lgsinnovations.github.io/sigfile",
   "main": "dist/sigfile.js",
+  "module": "dist/sigfile.mjs",
+  "types": "types/sigfile.d.ts",
+  "typesVersions": {
+    "*": {
+      "bluefile": [
+        "./types/bluefile.d.ts"
+      ],
+      "matfile": [
+        "./types/matfile.d.ts"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./types/sigfile.d.mts",
+        "default": "./dist/sigfile.mjs"
+      },
+      "require": {
+        "types": "./types/sigfile.d.ts",
+        "default": "./dist/sigfile.cjs"
+      }
+    },
+    "./bluefile": {
+      "import": {
+        "types": "./types/bluefile.d.mts",
+        "default": "./dist/bluefile.mjs"
+      },
+      "require": {
+        "types": "./types/bluefile.d.ts",
+        "default": "./dist/bluefile.cjs"
+      }
+    },
+    "./matfile": {
+      "import": {
+        "types": "./types/matfile.d.mts",
+        "default": "./dist/matfile.mjs"
+      },
+      "require": {
+        "types": "./types/matfile.d.ts",
+        "default": "./dist/matfile.cjs"
+      }
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=22"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "types"
   ],
   "author": {
     "name": "LGS Innovations, Inc.",
@@ -36,56 +89,6 @@
     "parsing",
     "file-parser"
   ],
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "targets": {
-            "node": "current"
-          }
-        }
-      ]
-    ],
-    "plugins": [
-      "@babel/plugin-proposal-class-properties"
-    ]
-  },
-  "eslintConfig": {
-    "env": {
-      "browser": true,
-      "node": true,
-      "es2017": true,
-      "jest": true
-    },
-    "globals": {
-      "page": true,
-      "browser": true,
-      "context": true,
-      "jestPuppeteer": true
-    },
-    "extends": [
-      "eslint:recommended",
-      "prettier"
-    ],
-    "parser": "babel-eslint",
-    "parserOptions": {
-      "ecmaVersion": 9,
-      "sourceType": "module"
-    },
-    "plugins": [
-      "jest"
-    ],
-    "rules": {
-      "no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_"
-        }
-      ]
-    }
-  },
   "prettier": {
     "overrides": [
       {
@@ -103,41 +106,39 @@
     ]
   },
   "scripts": {
-    "build:prod": "npm run clean && npm run lint && npx webpack --progress --mode=production",
-    "build:dev": "npm run clean && npm run lint && npx webpack --progress --mode=development",
+    "build:prod": "npm run clean && npx rollup -c --environment NODE_ENV:production",
+    "build:dev": "npm run clean && npx rollup -c",
+    "check:dist": "npx eslint -c eslint.dist.config.mjs dist",
     "clean": "rm -rf ./dist",
-    "eslint": "npx eslint . --fix --ignore-path .gitignore",
-    "eslint:check": "npx eslint . --ignore-path .gitignore",
+    "eslint": "npx eslint . --fix",
+    "eslint:check": "npx eslint .",
     "generate-docs": "rm -rf ./doc/; npx jsdoc --configure .jsdoc.json --verbose",
     "lint": "npm run prettier && npm run eslint",
-    "prettier": "npx prettier --ignore-path .gitignore --write \"**/*{.js,.css,.json}\"",
-    "prettier:check": "npx prettier --check --ignore-path .gitignore --write \"**/*{.js,.css,.json}\"",
-    "test:browser": "npx jest --coverage -c jest.browser.config.js --env=jsdom",
-    "test:node": "npx jest --coverage -c jest.node.config.js",
-    "test": "npm run test:node && npm run test:browser"
+    "lint:check": "npm run prettier:check && npm run eslint:check",
+    "prepack": "npm run build:prod && npm run check:dist",
+    "prettier": "npx prettier --ignore-path .gitignore --write \"**/*{.js,.mjs,.css,.json}\"",
+    "prettier:check": "npx prettier --check --ignore-path .gitignore \"**/*{.js,.mjs,.css,.json}\"",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@babel/core": "^7.9.0",
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "@babel/preset-env": "^7.9.5",
-    "babel-eslint": "^10.1.0",
-    "babel-jest": "^25.3.0",
-    "babel-loader": "^8.1.0",
-    "chai": "^4.2.0",
-    "coverage": "^0.4.1",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-jest": "^23.8.2",
-    "http-server": "^0.12.1",
-    "jest": "^25.3.0",
-    "jest-cli": "^25.3.0",
-    "jest-puppeteer": "^4.4.0",
-    "jsdoc": "^3.6.4",
-    "minami": "^1.2.3",
-    "prettier": "^2.0.4",
-    "puppeteer": "^3.0.1",
-    "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@eslint/js": "^9.0.0",
+    "@rollup/plugin-babel": "^6.1.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-terser": "^1.0.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "docdash": "^2.0.2",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "globals": "^15.0.0",
+    "jsdoc": "^4.0.5",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.0.0",
+    "rollup": "^4.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
   }
 }

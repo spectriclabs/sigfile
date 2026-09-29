@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import {
   update,
   applySupportsTypedArray,
@@ -7,7 +6,6 @@ import {
   str2ab,
   pow2,
   parseURL,
-  text2buffer,
 } from '../src/util';
 
 describe('update', () => {
@@ -91,7 +89,7 @@ describe('update', () => {
 
 describe('getInt64', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
   it('should handle empty input', () => {
     const buffer = new ArrayBuffer(8);
@@ -130,12 +128,12 @@ describe('getInt64', () => {
 
 describe('applySupportsTypedArray', () => {
   it("should return false if doesn't support", () => {
-    jest.spyOn(String.fromCharCode, 'apply').mockImplementation(() => false);
+    vi.spyOn(String.fromCharCode, 'apply').mockImplementation(() => false);
     const result = applySupportsTypedArray();
     expect(result).to.be.false;
   });
   it('should return false if error thrown', () => {
-    jest.spyOn(String.fromCharCode, 'apply').mockImplementation(() => {
+    vi.spyOn(String.fromCharCode, 'apply').mockImplementation(() => {
       throw 'test';
     });
     const result = applySupportsTypedArray();
@@ -323,43 +321,5 @@ describe('parseURL', () => {
     expect(result.path).to.equal('/foo/bar');
     expect(result.relative).to.equal('/foo/bar');
     expect(result.segments).to.eql(['foo', 'bar']);
-  });
-});
-
-describe('text2buffer', () => {
-  it('should handle empty text', (done) => {
-    text2buffer('', (buf) => {
-      expect(buf.byteLength).to.eql(0);
-      done();
-    });
-  });
-
-  it('should handle no-provided blocksize', (done) => {
-    text2buffer('abc', (buf) => {
-      expect(buf.byteLength).to.eql(3);
-      done();
-    });
-  });
-
-  it('should handle provided blocksize', (done) => {
-    text2buffer(
-      'abc',
-      (buf) => {
-        expect(buf.byteLength).to.eql(3);
-        done();
-      },
-      3
-    );
-  });
-
-  it('should handle larger text than blocksize', (done) => {
-    text2buffer(
-      'abcdef',
-      (buf) => {
-        expect(buf.byteLength).to.eql(6);
-        done();
-      },
-      3
-    );
   });
 });

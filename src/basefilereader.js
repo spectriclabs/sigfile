@@ -1,4 +1,4 @@
-import { parseURL, text2buffer } from './util';
+import { parseURL } from './util';
 
 /**
  * Abstract class that should be extended
@@ -17,39 +17,54 @@ class BaseFileReader {
   }
 
   /**
+   * @callback onload
+   * @param {BlueHeader|MatHeader|null} hdr - the parsed header, or null on failure
+   * @param {*} [err] - the error that caused the failure, when hdr is null
+   */
+
+  /**
+   * Internal method that parses a buffer and invokes onload exactly once.
+   * Errors thrown by onload itself are not caught.
+   *
+   * @private
+   * @memberof BaseFileReader
+   * @param {ArrayBuffer} buf - the raw file contents
+   * @param {onload} onload - callback when the header has been parsed
+   * @param {object} props - extra properties to set on the parsed header
+   */
+  _parse(buf, onload, props) {
+    let hdr;
+    try {
+      hdr = new this.header_class(buf, this.options);
+    } catch (err) {
+      onload(null, err);
+      return;
+    }
+    Object.assign(hdr, props);
+    onload(hdr);
+  }
+
+  /**
    * Internal method that will read a file or stop at the header
    *
    * @private
    * @memberof BaseFileReader
-   * @param {File} theFile - a File object for the Bluefile or Matfile
-   * @param {function} onload - callback when the header has been read
+   * @param {File|Blob} theFile - a File or Blob object for the Bluefile or Matfile
+   * @param {onload} onload - callback when the header has been read
    * @param {boolean} justHeader - Whether or not to only read the header
    */
   _read(theFile, onload, justHeader) {
-    const that = this;
+    const blob = justHeader ? theFile.slice(0, 512) : theFile;
     const reader = new FileReader();
-
-    // Note: webkitSlice is Chrome specific and deprecated now.
-    // For some backwards-compatibility, we'll continue to support it.
-    // In a future version, this will just use `File.slice`.
-    const sliceMethod =
-      theFile.webkitSlice === undefined ? 'slice' : 'webkitSlice';
-    const blob = justHeader ? theFile[sliceMethod](0, 512) : theFile;
-
-    // Closure to capture the file information.
-    reader.onloadend = ((theFile) => {
-      return function (e) {
-        if (e.target.error) {
-          onload(null);
-          return;
-        }
-        const raw = reader.result;
-        const hdr = new that.header_class(raw, that.options);
-        hdr.file = theFile;
-        hdr.file_name = theFile.name;
-        onload(hdr);
-      };
-    })(theFile);
+    reader.onload = () => {
+      this._parse(reader.result, onload, {
+        file: theFile,
+        file_name: theFile.name,
+      });
+    };
+    reader.onerror = () => {
+      onload(null, reader.error);
+    };
     reader.readAsArrayBuffer(blob);
   }
 
@@ -58,7 +73,7 @@ class BaseFileReader {
    *
    * @memberof BaseFileReader
    * @param {File} theFile - a File object for the Bluefile or Matfile
-   * @param {function} onload - callback when the header has been read
+   * @param {onload} onload - callback when the header has been read
    */
   readheader(theFile, onload) {
     this._read(theFile, onload, true);
@@ -69,54 +84,50 @@ class BaseFileReader {
    *
    * @memberof BaseFileReader
    * @param {File} theFile - a File object for the Bluefile or Matfile
-   * @param {function} onload - callback when the file has been read
+   * @param {onload} onload - callback when the file has been read
    */
   read(theFile, onload) {
     this._read(theFile, onload, false);
   }
 
   /**
-   * Read a Bluefile or Matfile from a URL
+   * Read a Bluefile or Matfile from a URL, including file:// URLs where
+   * the environment allows XMLHttpRequest to read them. Calling `abort()`
+   * on the returned request calls onload with an error named 'AbortError'.
    *
    * @memberof BaseFileReader
    * @param {string} href - the URL for the Bluefile or Matfile
-   * @param {function} onload - callback when the header has been read
+   * @param {onload} onload - callback when the header has been read
+   * @returns {XMLHttpRequest} the in-flight request
    */
   read_http(href, onload) {
-    const that = this;
-    const oReq = new XMLHttpRequest();
-    oReq.open('GET', href, true);
-    oReq.responseType = 'arraybuffer';
-    oReq.overrideMimeType('text/plain; charset=x-user-defined');
-    oReq.onload = function (_oEvent) {
-      if (oReq.readyState === 4) {
-        if (oReq.status === 200 || oReq.status === 0) {
-          // status = 0 is necessary for file URL
-          let arrayBuffer = null; // Note: not oReq.responseText
-          if (oReq.response) {
-            arrayBuffer = oReq.response;
-            const hdr = new that.header_class(arrayBuffer, that.options);
-            const fileUrl = parseURL(href);
-            hdr.file_name = fileUrl.file;
-            onload(hdr);
-          } else if (oReq.responseText) {
-            text2buffer(oReq.responseText, function (arrayBuffer) {
-              const hdr = new that.header_class(arrayBuffer, that.options);
-              const fileUrl = parseURL(href);
-              hdr.file_name = fileUrl.file;
-              onload(hdr);
-            });
-          }
-          return;
-        }
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', href, true);
+    xhr.responseType = 'arraybuffer';
+    xhr.onload = () => {
+      // file:// URLs report success with status 0
+      if ((xhr.status === 200 || xhr.status === 0) && xhr.response) {
+        this._parse(xhr.response, onload, { file_name: parseURL(href).file });
+      } else {
+        onload(null, new Error(`Failed to load ${href} (HTTP ${xhr.status})`));
       }
-      onload(null);
     };
-    oReq.onerror = function (_oEvent) {
-      onload(null);
+    xhr.onerror = () => {
+      onload(null, new Error(`Network error loading ${href}`));
     };
-    oReq.send(null);
-    return oReq;
+    // Callers can set xhr.timeout on the returned request
+    xhr.ontimeout = () => {
+      const err = new Error(`Timed out loading ${href}`);
+      err.name = 'TimeoutError';
+      onload(null, err);
+    };
+    xhr.onabort = () => {
+      const err = new Error(`Request aborted: ${href}`);
+      err.name = 'AbortError';
+      onload(null, err);
+    };
+    xhr.send();
+    return xhr;
   }
 }
 

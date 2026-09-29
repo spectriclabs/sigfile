@@ -1,24 +1,35 @@
 name: Build and Deploy Docs
-on: [push]
+on:
+  push:
+    branches: [master]
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
       - name: Install and Build 🔧
         run: |
-          npm install
+          npm ci
           npm run generate-docs
           ln -s  ./doc/sigfile/latest
+
       - name: Set doc version
         id: vars
-        run: echo ::set-output name=doc_version::$(grep '"version"' package.json | cut -d '"' -f 4)
+        run: echo "doc_version=$(grep '"version"' package.json | cut -d '"' -f 4)" >> "$GITHUB_OUTPUT"
+
       - name: Deploy 🚀
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./doc/sigfile/${{ steps.vars.outputs.doc_version }}
