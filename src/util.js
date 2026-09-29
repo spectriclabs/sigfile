@@ -93,6 +93,23 @@ function update(dst, src) {
 }
 
 /**
+ * Clamp a 64-bit integer value to what a JS number can represent exactly,
+ * returning +/-Infinity (with a warning) when it doesn't fit.
+ *
+ * @private
+ * @param {number} value
+ * @returns {number}
+ */
+function toSafeNumber(value) {
+  const MAX_INT = Math.pow(2, 53);
+  if (value >= MAX_INT || value <= -MAX_INT) {
+    console.warn('Int is bigger than JS can represent.');
+    return value > 0 ? Infinity : -Infinity;
+  }
+  return value;
+}
+
+/**
  * Returns the 64-bit integer from the data buffer at
  * the requested offset.
  *
@@ -103,17 +120,64 @@ function update(dst, src) {
  * @returns {number} The 64-bit integer from the `dataView`
  */
 function getInt64(dataView, index, littleEndian) {
-  const MAX_INT = Math.pow(2, 53);
   const [highIndex, lowIndex] = littleEndian ? [4, 0] : [0, 4];
   const high = dataView.getInt32(index + highIndex, littleEndian);
-  const low = dataView.getInt32(index + lowIndex, littleEndian);
-  const rv = low + pow2(32) * high;
-  if (rv >= MAX_INT) {
-    console.warn('Int is bigger than JS can represent.');
-    return Infinity;
+  const low = dataView.getUint32(index + lowIndex, littleEndian);
+  return toSafeNumber(low + pow2(32) * high);
+}
+
+/**
+ * Returns the unsigned 64-bit integer from the data buffer at
+ * the requested offset.
+ *
+ * @memberOf util
+ * @param {DataView} dataView - Data buffer
+ * @param {number} index - The byte offset into the data buffer
+ * @param {boolean} littleEndian - The endianness of the data
+ * @returns {number} The unsigned 64-bit integer from the `dataView`
+ */
+function getUint64(dataView, index, littleEndian) {
+  const [highIndex, lowIndex] = littleEndian ? [4, 0] : [0, 4];
+  const high = dataView.getUint32(index + highIndex, littleEndian);
+  const low = dataView.getUint32(index + lowIndex, littleEndian);
+  return toSafeNumber(low + pow2(32) * high);
+}
+
+/**
+ * Copy `count` elements of `width` bytes each, starting at byte `offset`
+ * of `buf`, into a new ArrayBuffer with the byte order of every element
+ * reversed. Used to read data whose endianness differs from the host's.
+ *
+ * @memberOf util
+ * @param {ArrayBuffer} buf - Source buffer
+ * @param {number} offset - Byte offset of the first element
+ * @param {number} count - Number of elements
+ * @param {number} width - Bytes per element (2, 4, or 8)
+ * @returns {ArrayBuffer} A new buffer holding the byte-swapped elements
+ */
+function swapBytes(buf, offset, count, width) {
+  const byteLength = count * width;
+  const src = new DataView(buf, offset, byteLength);
+  const out = new ArrayBuffer(byteLength);
+  const dst = new DataView(out);
+  // Reading little-endian and writing big-endian reverses each word's bytes
+  if (width === 2) {
+    for (let i = 0; i < byteLength; i += 2) {
+      dst.setUint16(i, src.getUint16(i, true), false);
+    }
+  } else if (width === 4) {
+    for (let i = 0; i < byteLength; i += 4) {
+      dst.setUint32(i, src.getUint32(i, true), false);
+    }
+  } else if (width === 8) {
+    for (let i = 0; i < byteLength; i += 8) {
+      dst.setUint32(i, src.getUint32(i + 4, true), false);
+      dst.setUint32(i + 4, src.getUint32(i, true), false);
+    }
   } else {
-    return rv;
+    throw new Error(`Cannot byte-swap ${width}-byte elements`);
   }
+  return out;
 }
 
 /**
@@ -138,7 +202,7 @@ function applySupportsTypedArray() {
     if (test !== 'BLUE') {
       return false;
     }
-  } catch (error) {
+  } catch {
     return false;
   }
   return true;
@@ -220,67 +284,26 @@ function pow2(n) {
  * @see {@link http://james.padolsey.com/javascript/parsing-urls-with-the-dom/}
  */
 function parseURL(url) {
-  const a = document.createElement('a');
-  a.href = url;
+  const parsed = new URL(url, 'http://localhost/');
   return {
     source: url,
-    protocol: a.protocol.replace(':', ''),
-    host: a.hostname,
-    port: a.port,
-    query: a.search,
+    protocol: parsed.protocol.replace(':', ''),
+    host: parsed.hostname,
+    port: parsed.port,
+    query: parsed.search,
     params: (function () {
-      const ret = {},
-        seg = a.search.replace(/^\?/, '').split('&'),
-        len = seg.length;
-      for (let i = 0; i < len; i++) {
-        if (!seg[i]) {
-          continue;
-        }
-        let s = seg[i].split('=');
-        ret[s[0]] = s[1];
+      const ret = {};
+      for (const [key, value] of parsed.searchParams) {
+        ret[key] = value;
       }
       return ret;
     })(),
-    file: (a.pathname.match(/\/([^/?#]+)$/i) || [null, ''])[1],
-    hash: a.hash.replace('#', ''),
-    path: a.pathname.replace(/^([^/])/, '/$1'),
-    relative: (a.href.match(/tps?:\/\/[^/]+(.+)/) || [null, ''])[1],
-    segments: a.pathname.replace(/^\//, '').split('/'),
+    file: (parsed.pathname.match(/\/([^/?#]+)$/i) || [null, ''])[1],
+    hash: parsed.hash.replace('#', ''),
+    path: parsed.pathname.replace(/^([^/])/, '/$1'),
+    relative: (parsed.href.match(/tps?:\/\/[^/]+(.+)/) || [null, ''])[1],
+    segments: parsed.pathname.replace(/^\//, '').split('/'),
   };
-}
-
-/**
- * @callback onComplete
- * @param {ArrayBuffer} x - Callback for when text from HTTP response
- *                          has been converted into an ArrayBuffer
- */
-
-/**
- * Internal method to convert text from an HTTP response
- * into an ArrayBuffer.
- *
- * @memberOf util
- * @param {string} text - Text from HTTP response being converted
- * @param {onComplete} oncomplete - Callback that will run after text is converted
- * @param {number} [blocksize=1024] How much data we're expecting
- */
-function text2buffer(text, oncomplete, blocksize) {
-  blocksize = blocksize || 1024;
-  let i = 0;
-  const arrayBuffer = new ArrayBuffer(text.length);
-  const bufView = new Uint8Array(arrayBuffer);
-  const worker = () => {
-    const end = i + blocksize;
-    for (; i < end; i++) {
-      bufView[i] = text.charCodeAt(i) & 0xff;
-    }
-    if (i >= text.length) {
-      oncomplete(arrayBuffer);
-    } else {
-      setTimeout(worker, 0);
-    }
-  };
-  setTimeout(worker, 0);
 }
 
 export {
@@ -288,9 +311,10 @@ export {
   endianness,
   update,
   getInt64,
+  getUint64,
+  swapBytes,
   ab2str,
   str2ab,
   pow2,
   parseURL,
-  text2buffer,
 };

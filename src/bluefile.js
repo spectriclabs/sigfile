@@ -24,7 +24,7 @@
  */
 import BitArray from './bitarray';
 import { BaseFileReader } from './basefilereader';
-import { endianness, ab2str, getInt64 } from './util';
+import { endianness, ab2str, getInt64, swapBytes } from './util';
 
 /**
  * Bluefiles are a binary format directly supported by SigPlot.  A Bluefile consists of a 512-byte header
@@ -103,15 +103,15 @@ class BlueHeader {
     X: 10,
     T: 16,
     U: 1,
-    '1': 1,
-    '2': 2,
-    '3': 3,
-    '4': 4,
-    '5': 5,
-    '6': 6,
-    '7': 7,
-    '8': 8,
-    '9': 9,
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 9,
   };
 
   /**
@@ -268,7 +268,7 @@ class BlueHeader {
         this.buf,
         this.ext_size,
         this.ext_start * 512,
-        littleEndianHdr
+        littleEndianHdr,
       );
     }
   }
@@ -303,23 +303,28 @@ class BlueHeader {
 
     this.bpe = this.ape * this.bpa;
 
-    // TODO handle mismatch between host and data endianness using arrayBufferEndianness
-    const arrayBufferLittleEndian = BlueHeader.ARRAY_BUFFER_ENDIANNESS === 'LE';
-    const arrayBufferBigEndian = BlueHeader.ARRAY_BUFFER_ENDIANNESS === 'BE';
-    if (
-      (arrayBufferLittleEndian && !littleEndian) ||
-      (arrayBufferBigEndian && this.littleEndianData)
-    ) {
-      throw `Not supported ${BlueHeader.ARRAY_BUFFER_ENDIANNESS} ${littleEndian}`;
-    }
+    // Data written in the other byte order is copied and byte-swapped;
+    // host-order data is viewed in place without copying.
+    const hostLittleEndian = BlueHeader.ARRAY_BUFFER_ENDIANNESS === 'LE';
+    const swap = littleEndian !== hostLittleEndian && this.bps > 1;
     if (buf) {
-      if (offset && data_end) {
+      if (offset && data_end && offset < buf.byteLength) {
         const length = (data_end - offset) / this.bps;
-        this.dview = this.createArray(buf, offset, length);
-      } else {
+        this.dview = swap
+          ? this.createArray(
+              swapBytes(buf, offset, length, this.bps),
+              0,
+              length,
+            )
+          : this.createArray(buf, offset, length);
+        this.size = this.dview.length / (this.spa * this.ape);
+      } else if (!offset) {
         this.dview = this.createArray(buf);
+        this.size = this.dview.length / (this.spa * this.ape);
+      } else {
+        // Header-only read: the data isn't in buf, so derive size from the header
+        this.size = this.data_size / this.bpe;
       }
-      this.size = this.dview.length / (this.spa * this.ape);
     } else {
       this.dview = this.createArray(null, null, this.size);
     }
@@ -345,7 +350,7 @@ class BlueHeader {
     const dic_index = {};
     const dict_keywords = {};
     let ii = 0;
-    let temp_buf = buf.slice(offset, offset+lbuf);
+    let temp_buf = buf.slice(offset, offset + lbuf);
     const dvhdr = new DataView(temp_buf);
     while (ii < lbuf) {
       idata = ii + 8;
